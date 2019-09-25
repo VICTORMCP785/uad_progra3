@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef CAPPOBJLOADER_H
-#define CAPPOBJLOADER_H
+#ifndef CAPPFBXLOADER_H
+#define CAPPFBXLOADER_H
 
 #include "Globals.h"
 #include "CApp.h"
@@ -14,11 +14,11 @@
 
 // Class that inherits from Base class CApp
 // Base class CApp has members for: CGameWindow, CGameMenu, and COpenGLRenderer, which we can access through the public/protected methods
-class CAppObjLoader : public CApp
+class CAppFbxLoader : public CApp
 {
 private:
 	// Pointer to an object of type C3DModel
-	C3DModel *m_p3DModel; 
+	C3DModel *m_p3DModel;
 
 	// Current delta time (time of the current frame - time of the last frame)
 	double m_currentDeltaTime;
@@ -38,9 +38,9 @@ protected:
 
 public:
 	// Constructors and destructor
-	CAppObjLoader();
-	CAppObjLoader(int window_width, int window_height);
-	~CAppObjLoader();
+	CAppFbxLoader();
+	CAppFbxLoader(int window_width, int window_height);
+	~CAppFbxLoader();
 
 	// Inherited methods from CApp
 	// ---------------------------

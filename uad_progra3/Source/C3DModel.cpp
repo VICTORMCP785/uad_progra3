@@ -11,6 +11,7 @@ using namespace std;
 #include "../Include/Globals.h"
 #include "../Include/C3DModel.h"
 #include "../Include/C3DModel_Obj.h"
+#include "../Include/C3DModel_Fbx.h"
 #include "../Include/CTextureLoader.h"
 
 /* */
@@ -153,7 +154,13 @@ C3DModel* C3DModel::load(const char * const filename, COpenGLRenderer * const sh
 		}
 		else if (!fileExtension.compare("fbx"))
 		{
-			cout << "FBX file format reading not implemented" << endl;
+			cout << "Loading FBX model..." << endl;
+			newModel = new C3DModel_FBX();
+
+			if (!newModel->loadFromFile(filename))
+			{
+				newModel->reset();
+			}
 		}
 		
 		// If model geometry could be loaded, save it to graphics card

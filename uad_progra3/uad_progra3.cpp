@@ -12,13 +12,18 @@ using namespace std;
 #include "Include/CAppGeometricFigures.h"
 #include "Include/CAppEmpty.h"
 
+#include "Include/CAppMyCube.h"
+#include "Include/CAppSphere.h"
+
+#include "Include/CAppFbxLoader.h"
+
 int main()
 {
-	CApp *app = NULL;					// Pointer to BASE class CApp
-	app = new CAppEmpty(800, 600);		// Using pointer to base class, create a new object of DERIVED class
-	app->run();							// Run the app
-	delete app;							// Delete pointer
-	app = NULL;							// Set pointer to NULL
+	CApp *app = NULL;								// Pointer to BASE class CApp
+	app = new CAppFbxLoader(800, 600);				// Using pointer to base class, create a new object of DERIVED class
+	app->run();										// Run the app
+	delete app;										// Delete pointer
+	app = NULL;										// Set pointer to NULL
 
 	return 0;
 }
