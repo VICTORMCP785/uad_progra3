@@ -16,6 +16,13 @@ public:
 
 	CVector3 calcpoint(CVector3 Center, int numpoint, float cellsize, bool pointy);
 
+	int getTriangleCount();
+
+	CVector3 getCorners(int num);
+
+	bool pointy;
+	int size;
+
 	CVector3 P1, P2, P3, P4, P5, P6, m_Centro;
 
 	C3DModel *mod;

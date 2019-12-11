@@ -10,17 +10,24 @@ using namespace std;
 #include "Include/CAppCubeTest.h"
 #include "Include/CAppObjLoader.h"
 #include "Include/CAppGeometricFigures.h"
-#include "Include/CAppEmpty.h"
-
+#include "Include/CAppQuadTree.h"
 #include "Include/CAppMyCube.h"
 #include "Include/CAppSphere.h"
 
+//Proyecto Parcial 1
 #include "Include/CAppFbxLoader.h"
+
+//Proyecto Parcial 2
+#include "Include/CAppHexagrid.h"
+
+//Proyecto Parcial 3
+#include "Include/CAppQuadTree.h"
+
 
 int main()
 {
 	CApp *app = NULL;								// Pointer to BASE class CApp
-	app = new CAppFbxLoader(800, 600);				// Using pointer to base class, create a new object of DERIVED class
+	app = new CAppQuadTree(800, 600);				// Using pointer to base class, create a new object of DERIVED class
 	app->run();										// Run the app
 	delete app;										// Delete pointer
 	app = NULL;										// Set pointer to NULL

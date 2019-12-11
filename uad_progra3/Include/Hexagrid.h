@@ -17,6 +17,9 @@ public:
 	int m_Columnas;
 	int m_Filas;
 
+	int m_faces;
+	int size;
+
 	float m_Vertices[18];
 	float m_UVVertices[8];
 	unsigned short m_FacesIndices[12];

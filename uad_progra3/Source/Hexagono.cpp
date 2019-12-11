@@ -10,6 +10,8 @@ CHexagon::CHexagon(CVector3 Centro, float Size, bool IsPointy)
 	P6 = calcpoint(Centro, 6, Size, IsPointy);
 	m_Centro = Centro;
 	mod = nullptr;
+	pointy = IsPointy;
+	size = Size;
 }
 
 CHexagon::CHexagon()
@@ -32,6 +34,8 @@ void CHexagon::ConstructorFalso(CVector3 Centro, float Size, bool IsPointy)
 	P6 = calcpoint(Centro, 6, Size, IsPointy);
 	m_Centro = Centro;
 	mod = nullptr;
+	pointy = IsPointy;
+	size = Size;
 }
 
 CVector3 CHexagon::calcpoint(CVector3 Center, int numpoint, float Size, bool IsPointy)
@@ -54,5 +58,19 @@ CVector3 CHexagon::calcpoint(CVector3 Center, int numpoint, float Size, bool IsP
 		Point.Z = Center.Y + Size * sin(angle_rad);
 	}
 	return Point;
+}
+
+int CHexagon::getTriangleCount()
+{
+	if (mod != nullptr)
+	{
+		return mod->getNumFaces() + 4;
+	};
+	return 4;
+}
+
+CVector3 CHexagon::getCorners(int num)
+{
+	return calcpoint(m_Centro, num, size, pointy);
 }
 
