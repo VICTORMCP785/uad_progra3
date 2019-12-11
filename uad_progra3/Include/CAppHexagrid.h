@@ -30,8 +30,6 @@ public:
 
 	C3DModel *m_modelos = nullptr;
 	string m_nombre;
-
-
 	string m_Nombre_Modelo;
 	int m_Fila_Modelo;
 	int m_Columna_Modelo;

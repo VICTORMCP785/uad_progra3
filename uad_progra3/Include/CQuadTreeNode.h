@@ -20,13 +20,13 @@ public:
 	bool loadNodeToGeometry(COpenGLRenderer *, unsigned int &);
 
 private:
-	AABB_2D m_bounds;
+	AABB_2D m_LimitesCuadro;
 	CQuadTreeNode *h1;
 	CQuadTreeNode *h2;
 	CQuadTreeNode *h3;
 	CQuadTreeNode *h4;
-	std::vector<CHexagon *> m_data;
-	CHexagon ** m_HexData;
+	std::vector<CHexagon *> m_vecHex;
+	CHexagon ** m_Hexagono;
 
 
 };

@@ -22,13 +22,13 @@ public:
 	float Normal[6];
 	unsigned short NormalIndices[6];
 
-	void getCorners(CVector3 *);
+	void getEsquinas(CVector3 *);
 
-	void setCorners(CVector3 * inCorners);
+	void setEsquinas(CVector3 * inEsquinas);
 
-	bool pointsInside(CVector3 *);
+	bool PuntosInside(CVector3 *);
 
-	CVector3 corners[4];
+	CVector3 Esquinas[4];
 private:
 
 

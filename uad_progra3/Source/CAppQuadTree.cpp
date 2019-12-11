@@ -9,17 +9,6 @@ using namespace std;
 #include "..\Include\CQuadTree.h"
 #include <Windows.h>
 
-DWORD WINAPI ThreadCreateGrid(LPVOID p) 
-{
-	CAppQuadTree *appQuadTree = (CAppQuadTree *)p;
-	if (appQuadTree->startGridThread())
-	{
-		return 0;
-	}
-	return -1;
-}
-
-
 CAppQuadTree::CAppQuadTree() :
 	CAppQuadTree(CGameWindow::DEFAULT_WINDOW_WIDTH, CGameWindow::DEFAULT_WINDOW_HEIGHT)
 {
@@ -44,7 +33,6 @@ CAppQuadTree::CAppQuadTree(int window_width, int window_height) :
 /* */
 CAppQuadTree::~CAppQuadTree()
 {
-	cout << "Destructor: ~CAppQuadTree()" << endl;
 }
 
 /* */
@@ -65,7 +53,7 @@ void CAppQuadTree::initialize()
 		cout << "F por el Shader" << endl;
 	}
 
-	m_hexaGrid = new CHexagrid(2, 2, 1.0f, true);
+	m_hexaGrid = new CHexagrid(12, 12, 1.75f, true);
 	bool halo = getOpenGLRenderer()->allocateGraphicsMemoryForObject(
 		&m_colorModelShaderID,
 		&VertexArrayObject,
@@ -118,17 +106,13 @@ void CAppQuadTree::initialize()
 	Bounds[0] = CVector3(Xmin, 0.0f, Zmax);
 	Bounds[0] = CVector3(Xmax, 0.0f, Zmax);
 
-	m_AABB.setCorners(Bounds);
+	m_AABB.setEsquinas(Bounds);
 	
-	m_QuadTree.SubDivide(m_hexaGrid->arr_Cell, m_AABB, m_hexaGrid->m_Filas, m_hexaGrid->m_Columnas, 6, 5);
+	m_QuadTree.DividirArbol(m_hexaGrid->arr_Cell, m_AABB, m_hexaGrid->m_Filas, m_hexaGrid->m_Columnas, 6, 5);
 	
-	m_QuadTree.m_Root->loadNodeToGeometry(getOpenGLRenderer() ,m_colorModelShaderID);
+	m_QuadTree.m_Raiz->loadNodeToGeometry(getOpenGLRenderer() ,m_colorModelShaderID);
 
-	if (!halo)
-	{
-		cout << "F" << endl;
-	}
-	else
+	if (halo)
 	{
 		m_haloReachenPC = true;
 	}
@@ -242,60 +226,7 @@ void CAppQuadTree::render()
 		}
 		if (Not_F_QUADTREE)
 		{
-			m_QuadTree.m_Root->render(getOpenGLRenderer(), m_colorModelShaderID);
+			m_QuadTree.m_Raiz->render(getOpenGLRenderer(), m_colorModelShaderID);
 		}
 	}
-}
-
-bool CAppQuadTree::startGridThread()
-{
-	m_hexaGrid = new CHexagrid(12, 12, 1.0f, true);
-	bool loaded = getOpenGLRenderer()->allocateGraphicsMemoryForObject(
-		&m_colorModelShaderID,
-		&VertexArrayObject,
-		m_hexaGrid->m_Vertices,
-		6,
-		m_hexaGrid->m_Normal,
-		4,
-		m_hexaGrid->m_UVVertices,
-		8,
-		m_hexaGrid->m_FacesIndices,
-		4,
-		m_hexaGrid->m_NormalIndices,
-		4,
-		m_hexaGrid->m_FacesIndices,
-		4
-	);
-	if (!loaded)
-	{
-		cout << "Error loading cell to graphics memory\n";
-		m_hexaGrid->m_faces = 0;
-		if (VertexArrayObject > 0)
-		{
-			getOpenGLRenderer()->freeGraphicsMemoryForObject(&VertexArrayObject);
-			VertexArrayObject = 0;
-		}
-	}
-	else
-	{
-		VertexArrayObject = 1;
-		m_haloReachenPC = true;
-	}
-	return m_haloReachenPC;
-}
-
-void CAppQuadTree::onArrowUp(int mods)
-{
-}
-
-void CAppQuadTree::onArrowDown(int mods)
-{
-}
-
-void CAppQuadTree::onArrowLeft(int mods)
-{
-}
-
-void CAppQuadTree::onArrowRight(int mods)
-{
 }

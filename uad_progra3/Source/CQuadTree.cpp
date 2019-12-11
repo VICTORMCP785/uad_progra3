@@ -2,29 +2,29 @@
 
 CQuadTree::CQuadTree()
 {
-	m_Root = nullptr;
 }
 
 CQuadTree::~CQuadTree()
 {
 }
 
-void CQuadTree::SubDivide(CHexagon ** ArrCell, AABB_2D boundingbox, int filas, int columnas, int limitTri, int subdiviLimit)
+void CQuadTree::DividirArbol(CHexagon ** ArrCell, AABB_2D boundingbox, int filas, int columnas, int LimiteDeTriangulos, int LimiteDeSubDivisiones)
 {
-	if (m_Root == nullptr)
+	if (m_Raiz == nullptr)
 	{
-		m_Root = new CQuadTreeNode();
-		LimitSub = subdiviLimit;
-		LimitTriangles = limitTri;
-		m_Root->SetLimit(boundingbox);
-		m_Root->PrimerSubDivide(LimitTriangles, boundingbox, ArrCell, filas, columnas, 0, LimitSub);
+		m_Raiz = new CQuadTreeNode();
+		LimitSub = LimiteDeSubDivisiones;
+		LimitTriangles = LimiteDeTriangulos;
+		m_Raiz->SetLimit(boundingbox);
+		m_Raiz->PrimerSubDivide(LimitTriangles, boundingbox, ArrCell, filas, columnas, 0, LimitSub);
 	}
 }
+
 bool CQuadTree::LoadTree(COpenGLRenderer *OBRender, unsigned int &ID)
 {
-	if (m_Root != nullptr)
+	if (m_Raiz != nullptr)
 	{
-		m_root->loadNodeToGeometry(OBRender, ID);
+		m_Raiz->loadNodeToGeometry(OBRender, ID);
 		return true;
 	}
 	return false;

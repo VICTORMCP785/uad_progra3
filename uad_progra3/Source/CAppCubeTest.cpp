@@ -149,7 +149,7 @@ void CAppCubeTest::render()
 		0.5f, 0.5f, 0.5f
 	);
 
-	MathHelper::Matrix4 tm = MathHelper::TranslationMatrix(
+	MathHelper::Matrix4 tm = MathHelper::TranslationMatrix(//usar varias veces
 		m_objectPosition.X, m_objectPosition.Y, m_objectPosition.Z
 	);
 

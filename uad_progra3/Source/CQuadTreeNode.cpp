@@ -21,7 +21,7 @@ void CQuadTreeNode::render(COpenGLRenderer* renderr, unsigned int ColorShaderID)
 	renderr->renderObject
 	(
 		&ColorShaderID,
-		&m_bounds.val,
+		&m_LimitesCuadro.val,
 		0,
 		2,
 		colorsuki,
@@ -37,28 +37,28 @@ void CQuadTreeNode::render(COpenGLRenderer* renderr, unsigned int ColorShaderID)
 	}
 }
 
-void CQuadTreeNode::SubDivide(std::vector <CHexagon*> cells, int Limit, AABB_2D PBoubds, int climit, int maxlimit)
+void CQuadTreeNode::SubDivide(std::vector <CHexagon*> HexArr, int Limit, AABB_2D LimitesPadres, int climit, int maxlimit)
 {
 	int tricount = 0;
 	int diCount = climit;
-	for(int i = 0; i < cells.size(); i++)
+	for(int i = 0; i < HexArr.size(); i++)
 	{
-		tricount += cells[i]->getTriangleCount();
+		tricount += HexArr[i]->getTriangleCount();
 	}
-	if (cells.size() == 1 || tricount <= Limit || diCount >= maxlimit)
+	if (HexArr.size() == 1 || tricount <= Limit || diCount >= maxlimit)
 	{
-		if (m_data.size() > 0)
+		if (m_vecHex.size() > 0)
 		{
-			m_data = cells;
+			m_vecHex = HexArr;
 		}
 		h1 = h2 = h3 = h4 = nullptr;
 	}
 	else
 	{
 		CVector3 Esquinas[4];
-		AABB_2D BoundsCh[4];
+		AABB_2D LimitesHijos[4];
 
-		PBoubds.getCorners(Esquinas);
+		LimitesPadres.getEsquinas(Esquinas);
 
 		Esquinas[1].X = (Esquinas[1].getX() / 2) + (Esquinas[0].getX() / 2);
 		Esquinas[3].X = (Esquinas[3].getX() / 2) + (Esquinas[0].getX() / 2);
@@ -66,9 +66,9 @@ void CQuadTreeNode::SubDivide(std::vector <CHexagon*> cells, int Limit, AABB_2D 
 		Esquinas[2].Z = (Esquinas[2].getZ() / 2) + (Esquinas[0].getZ() / 2);
 		Esquinas[3].Z = (Esquinas[3].getZ() / 2) + (Esquinas[0].getZ() / 2);
 
-		BoundsCh[0].setCorners(Esquinas);
+		LimitesHijos[0].setEsquinas(Esquinas);
 
-		PBoubds.getCorners(Esquinas);
+		LimitesPadres.getEsquinas(Esquinas);
 		
 		Esquinas[0].X = (Esquinas[0].getX() / 2) + (Esquinas[1].getX() / 2);
 		Esquinas[2].X = (Esquinas[2].getX() / 2) + (Esquinas[1].getX() / 2);
@@ -76,18 +76,18 @@ void CQuadTreeNode::SubDivide(std::vector <CHexagon*> cells, int Limit, AABB_2D 
 		Esquinas[2].Z = (Esquinas[2].getZ() / 2) + (Esquinas[1].getZ() / 2);
 		Esquinas[3].Z = (Esquinas[3].getZ() / 2) + (Esquinas[1].getZ() / 2);
 		
-		BoundsCh[1].setCorners(Esquinas);
+		LimitesHijos[1].setEsquinas(Esquinas);
 
-		PBoubds.getCorners(Esquinas);
+		LimitesPadres.getEsquinas(Esquinas);
 		
 		Esquinas[1].X = (Esquinas[1].getX() / 2) + (Esquinas[2].getX() / 2);
 		Esquinas[3].X = (Esquinas[3].getX() / 2) + (Esquinas[2].getX() / 2);
 		
 		Esquinas[0].Z = (Esquinas[0].getZ() / 2) + (Esquinas[2].getZ() / 2);
 		Esquinas[1].Z = (Esquinas[1].getZ() / 2) + (Esquinas[2].getZ() / 2);
-		BoundsCh[2].setCorners(Esquinas);
+		LimitesHijos[2].setEsquinas(Esquinas);
 
-		PBoubds.getCorners(Esquinas);
+		LimitesPadres.getEsquinas(Esquinas);
 		
 		Esquinas[0].X = (Esquinas[0].getX() / 2) + (Esquinas[3].getX() / 2);
 		Esquinas[2].X = (Esquinas[2].getX() / 2) + (Esquinas[3].getX() / 2);
@@ -95,118 +95,118 @@ void CQuadTreeNode::SubDivide(std::vector <CHexagon*> cells, int Limit, AABB_2D 
 		Esquinas[1].Z = (Esquinas[1].getZ() / 2) + (Esquinas[3].getZ() / 2);
 		Esquinas[0].Z = (Esquinas[0].getZ() / 2) + (Esquinas[3].getZ() / 2);
 		
-		BoundsCh[3].setCorners(Esquinas);
+		LimitesHijos[3].setEsquinas(Esquinas);
 
 		h1 = new CQuadTreeNode();
-		h1->setBouds(BoundsCh[0]);
+		h1->setBouds(LimitesHijos[0]);
 		
 		h2 = new CQuadTreeNode();
-		h2->setBouds(BoundsCh[1]);
+		h2->setBouds(LimitesHijos[1]);
 		
 		h3 = new CQuadTreeNode();
-		h3->setBouds(BoundsCh[2]);
+		h3->setBouds(LimitesHijos[2]);
 		
 		h4 = new CQuadTreeNode();
-		h4->setBouds(BoundsCh[3]);
+		h4->setBouds(LimitesHijos[3]);
 
-		std::vector<CHexagon *> childCells[4];
-		for (int i = 0; i < cells.size(); i++)
+		std::vector<CHexagon *> CellHijos[4];
+		for (int i = 0; i < HexArr.size(); i++)
 		{
-			CHexagon *cell = cells[i];
+			CHexagon *cell = HexArr[i];
 			CVector3 cellEsquinas[6];
 			for (int x = 0; x < 6; x++)
 			{
 				cellEsquinas[x] = cell->getCorners(x + 1);
 			}
 
-			if (BoundsCh[0].pointsInside(cellEsquinas))
+			if (LimitesHijos[0].PuntosInside(cellEsquinas))
 			{
-				childCells[0].push_back(cell);
+				CellHijos[0].push_back(cell);
 			}
-			if (BoundsCh[1].pointsInside(cellEsquinas))
+			if (LimitesHijos[1].PuntosInside(cellEsquinas))
 			{
-				childCells[1].push_back(cell);
+				CellHijos[1].push_back(cell);
 			}
-			if (BoundsCh[2].pointsInside(cellEsquinas))
+			if (LimitesHijos[2].PuntosInside(cellEsquinas))
 			{
-				childCells[2].push_back(cell);
+				CellHijos[2].push_back(cell);
 			}
-			if (BoundsCh[3].pointsInside(cellEsquinas))
+			if (LimitesHijos[3].PuntosInside(cellEsquinas))
 			{
-				childCells[3].push_back(cell);
+				CellHijos[3].push_back(cell);
 			}
 		}
-		h1->SubDivide(childCells[0], Limit, BoundsCh[0],  diCount + 1, maxlimit);
-		h2->SubDivide(childCells[0], Limit, BoundsCh[0], diCount + 1, maxlimit);
-		h3->SubDivide(childCells[0], Limit, BoundsCh[0], diCount + 1, maxlimit);
-		h4->SubDivide(childCells[0], Limit, BoundsCh[0], diCount + 1, maxlimit);
+		h1->SubDivide(CellHijos[0], Limit, LimitesHijos[0],  diCount + 1, maxlimit);
+		h2->SubDivide(CellHijos[0], Limit, LimitesHijos[0], diCount + 1, maxlimit);
+		h3->SubDivide(CellHijos[0], Limit, LimitesHijos[0], diCount + 1, maxlimit);
+		h4->SubDivide(CellHijos[0], Limit, LimitesHijos[0], diCount + 1, maxlimit);
 	}
 }
 
-void CQuadTreeNode::PrimerSubDivide(int limit, AABB_2D PBoubds, CHexagon ** cells, int r, int c, int climit, int maxlimit)
+void CQuadTreeNode::PrimerSubDivide(int limit, AABB_2D LimitesPadres, CHexagon ** HexArr, int Filas, int Columnas, int climit, int maxlimit)
 {
 	int tricount = 0;
 	int diCount = climit;
-	for (int i = 0; i < r; i++)
+	for (int i = 0; i < Filas; i++)
 	{
-		for (int j = 0; j < c; j++)
+		for (int j = 0; j < Columnas; j++)
 		{
-			tricount += cells[i][j].getTriangleCount();
+			tricount += HexArr[i][j].getTriangleCount();
 		}
 	}
-	if ((r*c) == 1 || tricount <= limit || diCount >= maxlimit)
+	if ((Filas*Columnas) == 1 || tricount <= limit || diCount >= maxlimit)
 	{
-		m_HexData = cells;
+		m_Hexagono = HexArr;
 		h1 = h2 = h3 = h4 = nullptr;
 	}
 	else
 	{
 		CVector3 Esquinas[4];
-		AABB_2D BoundsCh[4];
+		AABB_2D LimitesHijos[4];
 
-		PBoubds.getCorners(Esquinas);
+		LimitesPadres.getEsquinas(Esquinas);
 		Esquinas[1].X = (Esquinas[1].getX() / 2) + (Esquinas[0].getX() / 2);
 		Esquinas[3].X = (Esquinas[3].getX() / 2) + (Esquinas[0].getX() / 2);
 		Esquinas[2].Z = (Esquinas[2].getZ() / 2) + (Esquinas[0].getZ() / 2);
 		Esquinas[3].Z = (Esquinas[3].getZ() / 2) + (Esquinas[0].getZ() / 2);
-		BoundsCh[0].setCorners(Esquinas);
+		LimitesHijos[0].setEsquinas(Esquinas);
 
-		PBoubds.getCorners(Esquinas);
+		LimitesPadres.getEsquinas(Esquinas);
 		Esquinas[0].X = (Esquinas[0].getX() / 2) + (Esquinas[1].getX() / 2);
 		Esquinas[2].X = (Esquinas[2].getX() / 2) + (Esquinas[1].getX() / 2);
 		Esquinas[2].Z = (Esquinas[2].getZ() / 2) + (Esquinas[1].getZ() / 2);
 		Esquinas[3].Z = (Esquinas[3].getZ() / 2) + (Esquinas[1].getZ() / 2);
-		BoundsCh[1].setCorners(Esquinas);
+		LimitesHijos[1].setEsquinas(Esquinas);
 
-		PBoubds.getCorners(Esquinas);
+		LimitesPadres.getEsquinas(Esquinas);
 		Esquinas[1].X = (Esquinas[1].getX() / 2) + (Esquinas[2].getX() / 2);
 		Esquinas[3].X = (Esquinas[3].getX() / 2) + (Esquinas[2].getX() / 2);
 		Esquinas[0].Z = (Esquinas[0].getZ() / 2) + (Esquinas[2].getZ() / 2);
 		Esquinas[1].Z = (Esquinas[1].getZ() / 2) + (Esquinas[2].getZ() / 2);
-		BoundsCh[2].setCorners(Esquinas);
+		LimitesHijos[2].setEsquinas(Esquinas);
 
-		PBoubds.getCorners(Esquinas);
+		LimitesPadres.getEsquinas(Esquinas);
 		Esquinas[0].X = (Esquinas[0].getX() / 2) + (Esquinas[3].getX() / 2);
 		Esquinas[2].X = (Esquinas[2].getX() / 2) + (Esquinas[3].getX() / 2);
 		Esquinas[1].Z = (Esquinas[1].getZ() / 2) + (Esquinas[3].getZ() / 2);
 		Esquinas[0].Z = (Esquinas[0].getZ() / 2) + (Esquinas[3].getZ() / 2);
-		BoundsCh[3].setCorners(Esquinas);
+		LimitesHijos[3].setEsquinas(Esquinas);
 
 		h1 = new CQuadTreeNode();
-		h1->setBouds(BoundsCh[0]);
+		h1->setBouds(LimitesHijos[0]);
 		h2 = new CQuadTreeNode();
-		h2->setBouds(BoundsCh[1]);
+		h2->setBouds(LimitesHijos[1]);
 		h3 = new CQuadTreeNode();
-		h3->setBouds(BoundsCh[2]);
+		h3->setBouds(LimitesHijos[2]);
 		h4 = new CQuadTreeNode();
-		h4->setBouds(BoundsCh[3]);
+		h4->setBouds(LimitesHijos[3]);
 
-		std::vector<CHexagon *> childCells[4];
-		for (int i = 0; i < r; i++)
+		std::vector<CHexagon *> CellHijos[4];
+		for (int i = 0; i < Filas; i++)
 		{
-			for (int j = 0; j < c; j++)
+			for (int j = 0; j < Columnas; j++)
 			{
-				CHexagon *cell = cells[i];
+				CHexagon *cell = HexArr[i];
 				CVector3 cellEsquinas[6];
 				for (int x = 0; x < 6; x++)
 				{
@@ -214,40 +214,40 @@ void CQuadTreeNode::PrimerSubDivide(int limit, AABB_2D PBoubds, CHexagon ** cell
 				}
 
 				//Obtener esquinas de la celda
-				if (BoundsCh[0].pointsInside(cellEsquinas))
+				if (LimitesHijos[0].PuntosInside(cellEsquinas))
 				{
-					childCells[0].push_back(cell);
+					CellHijos[0].push_back(cell);
 				}
-				if (BoundsCh[1].pointsInside(cellEsquinas))
+				if (LimitesHijos[1].PuntosInside(cellEsquinas))
 				{
-					childCells[1].push_back(cell);
+					CellHijos[1].push_back(cell);
 				}
-				if (BoundsCh[2].pointsInside(cellEsquinas))
+				if (LimitesHijos[2].PuntosInside(cellEsquinas))
 				{
-					childCells[2].push_back(cell);
+					CellHijos[2].push_back(cell);
 				}
-				if (BoundsCh[3].pointsInside(cellEsquinas))
+				if (LimitesHijos[3].PuntosInside(cellEsquinas))
 				{
-					childCells[3].push_back(cell);
+					CellHijos[3].push_back(cell);
 				}
 			}
 		}
-		h1->SubDivide(childCells[0], limit, BoundsCh[0], diCount + 1, maxlimit);
-		h2->SubDivide(childCells[0], limit, BoundsCh[0], diCount + 1, maxlimit);
-		h3->SubDivide(childCells[0], limit, BoundsCh[0], diCount + 1, maxlimit);
-		h4->SubDivide(childCells[0], limit, BoundsCh[0], diCount + 1, maxlimit);
+		h1->SubDivide(CellHijos[0], limit, LimitesHijos[0], diCount + 1, maxlimit);
+		h2->SubDivide(CellHijos[0], limit, LimitesHijos[0], diCount + 1, maxlimit);
+		h3->SubDivide(CellHijos[0], limit, LimitesHijos[0], diCount + 1, maxlimit);
+		h4->SubDivide(CellHijos[0], limit, LimitesHijos[0], diCount + 1, maxlimit);
 
 	}
 }
 
 void CQuadTreeNode::setBouds(AABB_2D Limits)
 {
-	m_bounds = Limits;
+	m_LimitesCuadro = Limits;
 }
 
 void CQuadTreeNode::SetLimit(AABB_2D Limits)
 {
-	m_bounds = Limits;
+	m_LimitesCuadro = Limits;
 }
 
 bool CQuadTreeNode::loadNodeToGeometry(COpenGLRenderer *Renders, unsigned int &ColorModelShaderID)
@@ -255,23 +255,23 @@ bool CQuadTreeNode::loadNodeToGeometry(COpenGLRenderer *Renders, unsigned int &C
 	bool Si_Halo_Reach_en_PC = Renders->allocateGraphicsMemoryForObject
 	(
 		&ColorModelShaderID,
-		&m_bounds.val,
-		m_bounds.Vertices,
+		&m_LimitesCuadro.val,
+		m_LimitesCuadro.Vertices,
 		4,
-		m_bounds.Normal,
+		m_LimitesCuadro.Normal,
 		2,
-		m_bounds.UVVertex,
+		m_LimitesCuadro.UVVertex,
 		4,
-		m_bounds.FaceIndices,
+		m_LimitesCuadro.FaceIndices,
 		2,
-		m_bounds.NormalIndices,
+		m_LimitesCuadro.NormalIndices,
 		2,
-		m_bounds.FaceIndices,
+		m_LimitesCuadro.FaceIndices,
 		2
 	);
 	if (!Si_Halo_Reach_en_PC)
 	{
-		Renders->freeGraphicsMemoryForObject(&m_bounds.val);
+		Renders->freeGraphicsMemoryForObject(&m_LimitesCuadro.val);
 	}
 	if (h1 != nullptr && h2 != nullptr && h3 != nullptr && h4 != nullptr)
 	{

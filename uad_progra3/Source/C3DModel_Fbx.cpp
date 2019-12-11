@@ -230,6 +230,7 @@ bool C3DModel_FBX::parseObjLine(ifstream &Archivo, std::string &line, bool count
 				token = strtok_s(nextToken, " *", &nextToken2);
 				m_numFaces = (stoi(token)) / 3;
 				m_vertexIndices = new unsigned short[m_numFaces * 3];
+				m_normalIndices = new unsigned short[m_numFaces * 3];
 				getline(Archivo, line);
 				token = strtok_s((char *)line.c_str(), "a: ,", &nextToken);
 				lineNumber++;
@@ -256,6 +257,7 @@ bool C3DModel_FBX::parseObjLine(ifstream &Archivo, std::string &line, bool count
 						temp -= 1;
 					}
 					m_vertexIndices[i] = temp;
+					m_normalIndices[i] = temp;
 					token = strtok_s(NULL, ",", &nextToken);
 				}
 				parsed = true;
@@ -325,7 +327,7 @@ bool C3DModel_FBX::parseObjLine(ifstream &Archivo, std::string &line, bool count
 				token = strtok_s(nextToken, " *", &nextToken2);
 				UVIndex = (stoi(token)) / 3;
 				m_UVindices = new unsigned short [UVIndex * 3];
-				m_normalIndices = new unsigned short[UVIndex * 3];
+				
 				getline(Archivo, line);
 				token = strtok_s((char *)line.c_str(), "a: ,", &nextToken);
 				lineNumber++;
@@ -345,7 +347,7 @@ bool C3DModel_FBX::parseObjLine(ifstream &Archivo, std::string &line, bool count
 						}
 					}
 					m_UVindices[i] = stoi(token);
-					m_normalIndices[i] = stoi(token);
+					
 					token = strtok_s(NULL, ",", &nextToken);
 				}
 				parsed = true;

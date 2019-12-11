@@ -55,7 +55,25 @@ CAppGeometricFigures::~CAppGeometricFigures()
 	// =================================================
 }
 
-/* */
+CVector3 calcpoint(CVector3 Center, int numpoint, float cellsize, bool pointy)
+{
+	CVector3 Point;
+	float angle = 60 * numpoint - 30;
+	float angleR = angle * PI_OVER_180;
+	Point.Y = 0.0f;
+	Point.X = Center.X + cellsize * cos(angleR);
+	Point.X = Center.Y + cellsize * sin(angleR);
+
+	return Point;
+}
+
+void Creccion_Hexagono(CVector3 C[6])
+{
+
+
+
+}
+
 void CAppGeometricFigures::initialize()
 {
 	// Initialize app-specific stuff here
@@ -107,6 +125,7 @@ void CAppGeometricFigures::initialize()
 	}
 
 	m_initialized = true;
+
 	createPyramidGeometry();
 }
 

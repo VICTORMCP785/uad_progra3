@@ -22,16 +22,7 @@ public:
 	void update(double deltaTime);
 	void run();
 	void render();
-	
-	void onArrowUp(int mods);
-	void onArrowDown(int mods);
-	void onArrowLeft(int mods);
-	void onArrowRight(int mods);
 		
-	bool startGridThread();
-
-
-	
 
 private:
 
