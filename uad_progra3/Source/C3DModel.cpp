@@ -12,6 +12,7 @@ using namespace std;
 #include "../Include/C3DModel.h"
 #include "../Include/C3DModel_Obj.h"
 #include "../Include/C3DModel_Fbx.h"
+#include "../Include/C3DModel_X.h"
 #include "../Include/CTextureLoader.h"
 
 /* */
@@ -144,9 +145,15 @@ C3DModel* C3DModel::load(const char * const filename, COpenGLRenderer * const sh
 				newModel->reset();
 			}
 		}
-		else if (!fileExtension.compare("3ds"))
+		else if (!fileExtension.compare("x"))
 		{
-			cout << "3DS file format reading not implemented" << endl;
+			cout << "Loading X model..." << endl;
+			newModel = new C3DModel_X();
+
+			if (!newModel->loadFromFile(filename))
+			{
+				newModel->reset();
+			}
 		}
 		else if (!fileExtension.compare("stl"))
 		{
