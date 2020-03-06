@@ -13,7 +13,7 @@ class C3DModel_FBX : public C3DModel
 private:
 	int m_currentVertex, m_currentNormal, m_currentUV, m_currentFace;	// Aux counters used when loading an object from file
 
-	bool readObjFile(const char * const filename, bool countOnly);		// Read object from file 
+	bool readFbxFile(const char * const filename, bool countOnly);		// Read object from file 
 	bool parseObjLine(
 		ifstream &,
 		std::string &line,

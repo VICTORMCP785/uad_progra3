@@ -54,7 +54,7 @@ bool C3DModel_FBX::loadFromFile(const char * const filename)
 	reset();
 
 	// First pass is to count the number of vertices, normals, UVs, faces
-	readFileOk = readObjFile(filename, false);
+	readFileOk = readFbxFile(filename, false);
 
 	// Display count
 	cout << "Finished reading 3D model" << endl;
@@ -117,7 +117,7 @@ bool C3DModel_FBX::loadFromFile(const char * const filename)
 
 /*
 */
-bool C3DModel_FBX::readObjFile(const char * filename, bool countOnly)
+bool C3DModel_FBX::readFbxFile(const char * filename, bool countOnly)
 {
 	ifstream infile;
 	string lineBuffer;

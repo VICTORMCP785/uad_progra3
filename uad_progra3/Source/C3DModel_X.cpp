@@ -89,7 +89,9 @@ bool C3DModel_X::parseXLine(ifstream &Archivo, std::string & line, bool countOnl
 				lineNumber++;
 				token = strtok_s((char *)line.c_str(), ";", &nextToken);
 				m_numVertices = (stoi(token));
+				m_numUVCoords = (stoi(token));
 				m_verticesRaw = new float[m_numVertices * 3];
+				m_uvCoordsRaw = new float[m_numVertices * 3];
 				int indice = 0;
 				for (int i = 0; i < m_numVertices; i++)
 				{

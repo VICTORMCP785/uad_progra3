@@ -100,7 +100,7 @@ void CAppHexagrid::initialize()
 	}*/
 
 	//json
-	ifstream in_file("hexgrid_cfg.json", ifstream::binary);
+	ifstream in_file("hexgrid_cfg_x.json", ifstream::binary);
 	J_Data << in_file;
 	J_Num_Columnas = J_Data["HexGrid"]["numCols"];
 	J_Num_Filas = J_Data["HexGrid"]["numRows"];
@@ -121,7 +121,7 @@ void CAppHexagrid::initialize()
 		std::string objName = "";
 		std::string objFileName = "";
 		Modelos *Model;
-		C3DModel_Obj *F;
+		C3DModel_X *F;
 
 		for (json::iterator it = J_Data["Models"].begin(); it < J_Data["Models"].end(); ++it)
 		{
@@ -129,7 +129,7 @@ void CAppHexagrid::initialize()
 			objFileName = it.value().value("filename", objFileName);
 			objFileName = "Resources/MEDIA/" + objFileName;
 
-			F = new C3DModel_Obj();
+			F = new C3DModel_X();
 
 			Model = new Modelos(objName, F->load(objFileName.c_str(), getOpenGLRenderer()));
 			
@@ -283,15 +283,14 @@ void CAppHexagrid::render()
 						MathHelper::Matrix4 MRY;
 						if (Ptr->arr_Cell[i][j].m_Rot[1] != 0)
 						{
-							MRY = MathHelper
-								::RotAroundY((float)Ptr->arr_Cell[i][j].m_Rot[1] * PI_OVER_180);
+							MRY = MathHelper::RotAroundY((float)Ptr->arr_Cell[i][j].m_Rot[1] * PI_OVER_180);
 						}
 
 						MathHelper::Matrix4 Multi = MathHelper::Multiply(MRY, ME);
 
 						MathHelper::Matrix4 MatrixModelo = MathHelper::Multiply(Multi, MT);
 
-							//Ptr->arr_Cell[i][j].float, 0, 0
+						//Ptr->arr_Cell[i][j].float, 0, 0
 						unsigned int tempINT = Ptr->arr_Cell[i][j].mod->getGraphicsMemoryObjectId();
 						getOpenGLRenderer()->renderObject(
 							&m_colorModelShaderId,
@@ -307,7 +306,6 @@ void CAppHexagrid::render()
 				}
 			}
 		}
-
 		/*CVector3 TempVector = { 0.0f, 0.0f, 0.0f };
 		MathHelper::Matrix4 gameObjectMatrix;
 		unsigned int tempINT;
