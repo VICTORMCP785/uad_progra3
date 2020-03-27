@@ -5,7 +5,7 @@
 
 #include "MathHelper.h"
 #include "AABB.h"
-//#include "AABB_2D.h"
+#include "CAABB_2D.h"
 #include "CVector3.h"
 #include "CPlane.h"
 
@@ -52,6 +52,7 @@ public:
 
 	//FRUSTUM_VISIBILITY_TEST_RESULT isAABBVisible(AABB &aabb);
 	FRUSTUM_VISIBILITY_TEST_RESULT isAABBVisible(AABB_2D &AABB_2D);
+	FRUSTUM_VISIBILITY_TEST_RESULT isAABBVisible2D(CAABB_2D &AABB_2D);
 	FRUSTUM_VISIBILITY_TEST_RESULT isPointVisible(CVector3 &point);
 
 	void update(CVector3 eyePos, CVector3 lookAtPos, CVector3 upVector, CVector3 right, float nearD, float farD, float fov, float aspectRatio);

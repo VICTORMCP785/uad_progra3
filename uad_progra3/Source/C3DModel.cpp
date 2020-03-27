@@ -250,6 +250,39 @@ C3DModel* C3DModel::load(const char * const filename, COpenGLRenderer * const sh
 	return newModel;
 }
 
+bool C3DModel::LoadToGraphicsMemory(COpenGLRenderer * const shp_OpenGLRenderer)
+{
+	unsigned int newModelVertexArrayObject;
+	unsigned int ShaderId = getShaderProgramId();
+
+	bool loadedToGraphicsCard = shp_OpenGLRenderer->allocateGraphicsMemoryForObject(
+		&ShaderId,
+		&newModelVertexArrayObject,
+		getModelVertices(),
+		getNumVertices(),
+		getModelNormals(),
+		getNumNormals(),
+		getModelUVCoords(),
+		getNumUVCoords(),
+		getModelVertexIndices(),
+		getNumFaces(),
+		getModelNormalIndices(),
+		getNumFaces(),
+		getModelUVCoordIndices(),
+		getNumFaces()
+	);
+
+	setGraphicsMemoryObjectId(newModelVertexArrayObject);
+
+	// If error ocurred, cleanup memory
+	if (!loadedToGraphicsCard)
+	{
+		setGraphicsMemoryObjectId(0);
+		return false;
+	}
+	return true;
+}
+
 /*
 */
 void C3DModel::computeFaceNormals()

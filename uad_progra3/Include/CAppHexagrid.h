@@ -10,6 +10,9 @@
 #include "Hexagrid.h"
 #include "C3DModel_Obj.h"
 #include "C3DModel_X.h"
+#include "CAABB_2D.h"
+#include "CQuadTree__Mk2.h"
+#include "CCamera.h"
 
 using json = nlohmann::json;
 
@@ -53,6 +56,7 @@ private:
 	unsigned int m_VertexArrayObject;
 	unsigned int m_textureID;
 	int m_renderPolygonMode;
+	bool Si_Jala;
 
 	CHexagrid * Ptr;
 
@@ -64,8 +68,18 @@ private:
 	float J_Size;
 	bool J_Type;
 	std::string J_celltype;
+	
 
 	std::vector <Modelos*> m_gameObjects;
+
+	DWORD m_Thread1Id;
+	HANDLE m_Thread1Handle;
+
+	DWORD m_Thread2Id;
+	HANDLE m_Thread2Handle;
+
+	CQuadTreeMK2 *m_QuadTree;
+	CCamera *m_Camera;
 
 protected:
 
@@ -80,6 +94,15 @@ public:
 	~CAppHexagrid();
 
 	void initialize();
+	
+	static DWORD WINAPI ThreadStarter_CreateGrid(LPVOID param);
+	DWORD Thread_CreateGrid();
+
+	static DWORD WINAPI ThreadStarter_LoadModels(LPVOID param);
+	DWORD Thread_LoadModels();
+
+	bool BuildQuadtree();
+
 	void update(double deltaTime);
 	void run();
 	void render();
@@ -88,6 +111,8 @@ public:
 	void onF3(int mods);
 	void onMouseMove(float deltaX, float deltaY);
 	void moveCamera(float direction);
+
+
 
 private:
 };

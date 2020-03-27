@@ -16,9 +16,13 @@ using namespace std;
 
 //Proyecto Parcial 1
 #include "Include/CAppFbxLoader.h"
+//Round 2 parcial 1
+#include "Include/CAppX.h"
 
 //Proyecto Parcial 2
 #include "Include/CAppHexagrid.h"
+//Round 2 Parcial 2
+
 
 //Proyecto Parcial 3
 #include "Include/CAppQuadTree.h"
@@ -26,11 +30,11 @@ using namespace std;
 
 int main()
 {
-	CApp *app = NULL;								// Pointer to BASE class CApp
-	app = new CAppQuadTree(800, 600);				// Using pointer to base class, create a new object of DERIVED class
-	app->run();										// Run the app
-	delete app;										// Delete pointer
-	app = NULL;										// Set pointer to NULL
+	CApp *app = NULL;			// Pointer to BASE class CApp
+	app = new CAppHexagrid(800, 600);	// Using pointer to base class, create a new object of DERIVED class
+	app->run();					// Run the app
+	delete app;					// Delete pointer
+	app = NULL;					// Set pointer to NULL
 
 	return 0;
 }

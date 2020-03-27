@@ -24,7 +24,7 @@ CAppHexagrid::CAppHexagrid(int window_width, int window_height) :
 	m_renderPolygonMode{0}
 {
 	cout << "Constructor: CAppHexagrid(int window_width, int window_height)" << endl;
-
+	m_Camera = new CCamera(CVector3(0.0f, 3.0f, -3.0f), window_width, window_height, 75.0f, 0.001f, 1000.0f, CVector3(0.0f, 0.0f, 3.0f));
 	// Initialize class member variables here
 }
 
@@ -51,6 +51,10 @@ CAppHexagrid::~CAppHexagrid()
 		{
 			delete m_gameObjects[i];
 		}
+	}
+	if (m_Camera != nullptr)
+	{
+		delete m_Camera;
 	}
 }
 
@@ -100,6 +104,160 @@ void CAppHexagrid::initialize()
 	}*/
 
 	//json
+	/*J_Data << in_file;
+	J_Num_Columnas = J_Data["HexGrid"]["numCols"];
+	J_Num_Filas = J_Data["HexGrid"]["numRows"];
+	J_Size = J_Data["HexGrid"]["cellSize"];
+	J_celltype = J_Data["HexGrid"]["orientation"].get<std::string>();
+	if (J_celltype == "pointy")
+	{
+		J_Type = true;
+	}
+	else
+	{
+		J_Type = false;
+	}*/
+	
+	m_Thread1Handle = CreateThread(NULL,
+		0,
+		ThreadStarter_CreateGrid,
+		(LPVOID) this,
+		0,
+		&m_Thread1Id
+		);
+	WaitForSingleObject(m_Thread1Handle,INFINITE);
+	
+	Si_Jala = getOpenGLRenderer()->allocateGraphicsMemoryForObject(
+		&m_colorModelShaderId,
+		&m_VertexArrayObject,
+		Ptr->m_Vertices,
+		6,
+		Ptr->m_Normal,
+		4,
+		Ptr->m_UVVertices,
+		8,
+		Ptr->m_FacesIndices,
+		4,
+		Ptr->m_NormalIndices,
+		4,
+		Ptr->m_FacesIndices,
+		4
+	);
+
+	//ifstream in_file("hexgrid_cfg_x.json", ifstream::binary);
+	//int objects_present = (int)J_Data.count("Models");
+	//if (objects_present > 0 && (J_Data["Models"].type() == json::value_t::array))
+	//{
+	//	std::string objName = "";
+	//	std::string objFileName = "";
+	//	Modelos *Model;
+	//	C3DModel_X *F;
+	//	for (json::iterator it = J_Data["Models"].begin(); it < J_Data["Models"].end(); ++it)
+	//	{
+	//		objName = it.value().value("name", objName);
+	//		objFileName = it.value().value("filename", objFileName);
+	//		objFileName = "Resources/MEDIA/" + objFileName;
+	//		F = new C3DModel_X();
+	//		Model = new Modelos(objName, F->load(objFileName.c_str(), getOpenGLRenderer()));
+	//		
+	//		m_gameObjects.push_back(Model);
+	//	}
+	//}
+	//
+	//bool Si_Jala = getOpenGLRenderer()->allocateGraphicsMemoryForObject(
+	//	&m_colorModelShaderId,
+	//	&m_VertexArrayObject,
+	//	Ptr->m_Vertices,
+	//	6,
+	//	Ptr->m_Normal,
+	//	4,
+	//	Ptr->m_UVVertices,
+	//	8,
+	//	Ptr->m_FacesIndices,
+	//	4,
+	//	Ptr->m_NormalIndices,
+	//	4,
+	//	Ptr->m_FacesIndices,
+	//	4
+	//);
+	//int Pos_Models = (int)J_Data.count("ModelInstances");
+	//if (Pos_Models > 0 && (J_Data["ModelInstances"].type() == json::value_t::array))
+	//{
+	//	string Nombre_Modelo;
+	//	int Fila;
+	//	int Columna;
+	//	float Tamaño;
+	//	float Rotacion[3];
+	//	json Jsun;
+	//	for (json::iterator it = J_Data["ModelInstances"].begin(); it < J_Data["ModelInstances"].end(); ++it)
+	//	{
+	//		Nombre_Modelo = it.value().value("model", Nombre_Modelo);
+	//		Fila = it.value().value("row", Fila);
+	//		Columna = it.value().value("column", Columna);
+	//		Tamaño = it.value().value("scale", Tamaño);
+	//		//Rotacion = it.value().value("rotation", );
+	//		int i = 0;
+	//		Jsun = it.value();
+	//		for (json::iterator It2 = Jsun["rotation"].begin(); It2 < Jsun["rotation"].end(); ++It2)
+	//		{
+	//			Rotacion[i] = It2.value();
+	//			i++;
+	//		}
+	//		for (int i = 0; i < m_gameObjects.size(); i++)
+	//		{
+	//			if (Nombre_Modelo == m_gameObjects[i]->m_nombre)
+	//			{
+	//				Ptr->arr_Cell[Fila][Columna].mod = m_gameObjects[i]->m_modelos;
+	//				Ptr->arr_Cell[Fila][Columna].Escala = Tamaño;
+	//				Ptr->arr_Cell[Fila][Columna].m_Rot[0] = Rotacion[0];
+	//				Ptr->arr_Cell[Fila][Columna].m_Rot[1] = Rotacion[1];
+	//				Ptr->arr_Cell[Fila][Columna].m_Rot[2] = Rotacion[2];
+	//			}
+	//		}
+	//	}
+	//}
+	//in_file.close();
+
+	m_Thread2Handle = CreateThread(NULL,
+		0,
+		ThreadStarter_LoadModels,
+		(LPVOID)this,
+		0,
+		&m_Thread2Id
+	);
+	WaitForSingleObject(m_Thread2Handle, INFINITE);
+
+	for (int  i = 0; i < m_gameObjects.size(); i++)
+	{
+		m_gameObjects[i]->m_modelos->LoadToGraphicsMemory(getOpenGLRenderer());
+	}
+
+	BuildQuadtree();
+
+	if (!Si_Jala)
+	{
+		cout << " F " << endl;
+		if (m_VertexArrayObject > 0)
+		{
+			getOpenGLRenderer()->freeGraphicsMemoryForObject(&m_VertexArrayObject);
+			m_VertexArrayObject = 0;
+		}
+	}
+	else
+	{
+		m_initialized = true;
+	}
+
+}
+
+DWORD __stdcall CAppHexagrid::ThreadStarter_CreateGrid(LPVOID param)
+{
+	CAppHexagrid * ptrInstance = (CAppHexagrid *)param;
+	return ptrInstance->Thread_CreateGrid();
+}
+
+DWORD CAppHexagrid::Thread_CreateGrid()
+{
 	ifstream in_file("hexgrid_cfg_x.json", ifstream::binary);
 	J_Data << in_file;
 	J_Num_Columnas = J_Data["HexGrid"]["numCols"];
@@ -114,7 +272,25 @@ void CAppHexagrid::initialize()
 	{
 		J_Type = false;
 	}
-	//
+
+	Ptr = new CHexagrid(J_Num_Columnas, J_Num_Filas, J_Size, J_Type);
+
+	
+
+	in_file.close();
+	return 0;
+}
+
+DWORD __stdcall CAppHexagrid::ThreadStarter_LoadModels(LPVOID param)
+{
+	CAppHexagrid * ptrInstance = (CAppHexagrid *)param;
+	return ptrInstance->Thread_LoadModels();
+}
+
+DWORD CAppHexagrid::Thread_LoadModels()
+{
+	ifstream in_file("hexgrid_cfg_x.json", ifstream::binary);
+
 	int objects_present = (int)J_Data.count("Models");
 	if (objects_present > 0 && (J_Data["Models"].type() == json::value_t::array))
 	{
@@ -132,30 +308,11 @@ void CAppHexagrid::initialize()
 			F = new C3DModel_X();
 
 			Model = new Modelos(objName, F->load(objFileName.c_str(), getOpenGLRenderer()));
-			
+
 			m_gameObjects.push_back(Model);
 		}
 	}
 	
-	Ptr = new CHexagrid(J_Num_Columnas, J_Num_Filas, J_Size, J_Type);
-
-	bool Si_Jala = getOpenGLRenderer()->allocateGraphicsMemoryForObject(
-		&m_colorModelShaderId,
-		&m_VertexArrayObject,
-		Ptr->m_Vertices,
-		6,
-		Ptr->m_Normal,
-		4,
-		Ptr->m_UVVertices,
-		8,
-		Ptr->m_FacesIndices,
-		4,
-		Ptr->m_NormalIndices,
-		4,
-		Ptr->m_FacesIndices,
-		4
-	);
-
 	int Pos_Models = (int)J_Data.count("ModelInstances");
 	if (Pos_Models > 0 && (J_Data["ModelInstances"].type() == json::value_t::array))
 	{
@@ -196,21 +353,146 @@ void CAppHexagrid::initialize()
 	}
 
 	in_file.close();
+	return 0;
+}
 
-	if (!Si_Jala)
+bool CAppHexagrid::BuildQuadtree()
+{
+	float minX, maxX, minZ, maxZ;
+
+	minX = 100.0f;
+	maxX = -100.0f;
+	minZ = Ptr->arr_Cell[0][0].P1.Z;
+	maxZ = Ptr->arr_Cell[0][0].P1.Z;
+
+	for (int i = 0; i < Ptr->m_Filas; i++)
 	{
-		cout << " F " << endl;
-		if (m_VertexArrayObject > 0)
+		for (int j = 0; j < Ptr->m_Columnas; j++)
 		{
-			getOpenGLRenderer()->freeGraphicsMemoryForObject(&m_VertexArrayObject);
-			m_VertexArrayObject = 0;
+			//P1
+			//if (Ptr->arr_Cell[i][j].P1.X < minX)
+			//{
+			//	minX = Ptr->arr_Cell[i][j].P1.X;
+			//}
+			//if (Ptr->arr_Cell[i][j].P1.X > maxX)
+			//{
+			//	maxX = Ptr->arr_Cell[i][j].P1.X;
+			//}
+			//if (Ptr->arr_Cell[i][j].P1.Z < minZ)
+			//{
+			//	minZ = Ptr->arr_Cell[i][j].P1.Z;
+			//}
+			//if (Ptr->arr_Cell[i][j].P1.Z > maxZ)
+			//{
+			//	maxZ = Ptr->arr_Cell[i][j].P1.Z;
+			//}
+			//if (j == 0)
+			//{
+			//	cout << Ptr->arr_Cell[i][j].m_Centro.Z << endl;
+			//	cout << "P1" << Ptr->arr_Cell[i][j].P1.Z << endl;
+			//	cout << "P4" << Ptr->arr_Cell[i][j].P4.Z << endl;
+			//}
+			////P2
+			//if (Ptr->arr_Cell[i][j].P2.X < minX)
+			//{
+			//	minX = Ptr->arr_Cell[i][j].P2.X;
+			//}
+			//if (Ptr->arr_Cell[i][j].P2.X > maxX)
+			//{
+			//	maxX = Ptr->arr_Cell[i][j].P2.X;
+			//}
+			//if (Ptr->arr_Cell[i][j].P2.Z < minZ)
+			//{
+			//	minZ = Ptr->arr_Cell[i][j].P2.Z;
+			//}
+			//if (Ptr->arr_Cell[i][j].P2.Z > maxZ)
+			//{
+			//	maxZ = Ptr->arr_Cell[i][j].P2.Z;
+			//}
+			////P3
+			//if (Ptr->arr_Cell[i][j].P3.X < minX)
+			//{
+			//	minX = Ptr->arr_Cell[i][j].P3.X;
+			//}
+			//if (Ptr->arr_Cell[i][j].P3.X > maxX)
+			//{
+			//	maxX = Ptr->arr_Cell[i][j].P3.X;
+			//}
+			//if (Ptr->arr_Cell[i][j].P3.Z < minZ)
+			//{
+			//	minZ = Ptr->arr_Cell[i][j].P3.Z;
+			//}
+			//if (Ptr->arr_Cell[i][j].P3.Z > maxZ)
+			//{
+			//	maxZ = Ptr->arr_Cell[i][j].P3.Z;
+			//}
+			////P4
+			//if (Ptr->arr_Cell[i][j].P4.X < minX)
+			//{
+			//	minX = Ptr->arr_Cell[i][j].P4.X;
+			//}
+			//if (Ptr->arr_Cell[i][j].P4.X > maxX)
+			//{
+			//	maxX = Ptr->arr_Cell[i][j].P4.X;
+			//}
+			//if (Ptr->arr_Cell[i][j].P4.Z < minZ)
+			//{
+			//	minZ = Ptr->arr_Cell[i][j].P4.Z;
+			//}
+			//if (Ptr->arr_Cell[i][j].P4.Z > maxZ)
+			//{
+			//	maxZ = Ptr->arr_Cell[i][j].P4.Z;
+			//}
+			////P5
+			//if (Ptr->arr_Cell[i][j].P5.X < minX)
+			//{
+			//	minX = Ptr->arr_Cell[i][j].P5.X;
+			//}
+			//if (Ptr->arr_Cell[i][j].P5.X > maxX)
+			//{
+			//	maxX = Ptr->arr_Cell[i][j].P5.X;
+			//}
+			//if (Ptr->arr_Cell[i][j].P5.Z < minZ)
+			//{
+			//	minZ = Ptr->arr_Cell[i][j].P5.Z;
+			//}
+			//if (Ptr->arr_Cell[i][j].P5.Z > maxZ)
+			//{
+			//	maxZ = Ptr->arr_Cell[i][j].P5.Z;
+			//}
+			//P6
+			if (Ptr->arr_Cell[i][j].m_Centro.X < minX)
+			{
+				minX = Ptr->arr_Cell[i][j].m_Centro.X;
+			}
+			if (Ptr->arr_Cell[i][j].m_Centro.X > maxX)
+			{
+				maxX = Ptr->arr_Cell[i][j].m_Centro.X;
+			}
+			if (Ptr->arr_Cell[i][j].m_Centro.Z < minZ)
+			{
+				minZ = Ptr->arr_Cell[i][j].m_Centro.Z;
+			}
+			if (Ptr->arr_Cell[i][j].m_Centro.Z > maxZ)
+			{
+				maxZ = Ptr->arr_Cell[i][j].m_Centro.Z;
+			}
+			if (j == 0)
+			{
+				cout << Ptr->arr_Cell[i][j].m_Centro.Z << endl;
+				cout << "P1 " << Ptr->arr_Cell[i][j].P1.Z << endl;
+				cout << "P4 " << Ptr->arr_Cell[i][j].P4.Z << endl;
+			}		
 		}
-	}
-	else
-	{
-		m_initialized = true;
-	}
 
+	}
+	cout << "MaxX y MinX" << endl;
+	std::cout << maxX << endl << minX << endl;
+	cout << "MaxZ y MinZ" << endl;
+	std::cout << maxZ << endl << minZ << endl;
+	CAABB_2D Init(minX, maxX, minZ, maxZ);
+	m_QuadTree = new CQuadTreeMK2( Init, Ptr, 400 );
+	return false;
 }
 
 void CAppHexagrid::run()
@@ -259,52 +541,105 @@ void CAppHexagrid::render()
 
 		if (m_VertexArrayObject > 0)
 		{
-			for (int i = 0; i < Ptr->m_Filas; i++)
+			std::vector <CHexagon*> Celdas_Visibles;
+			m_Camera->Recalc();
+			m_QuadTree->GetCells(&Celdas_Visibles, m_Camera);
+			for (int i = 0; i < Celdas_Visibles.size(); i++)
 			{
-				for (int j = 0; j < Ptr->m_Columnas; j++)
+				CHexagon *Cell;
+				Cell = Celdas_Visibles[i];
+				modelmatrix = MathHelper::SimpleModelMatrixRotationTranslation((float)totalDegreesrotatedradiance, Cell->m_Centro);
+				getOpenGLRenderer()->renderObject(
+					&m_colorModelShaderId,
+					&m_VertexArrayObject,
+					0,
+					4,
+					Color,
+					&modelmatrix,
+					&m_Camera->GetViewMatrix(),
+					&m_Camera->GetProyectionMatrix(),
+					COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
+					false
+				);
+				if (Cell->mod != nullptr)
 				{
-					modelmatrix = MathHelper::SimpleModelMatrixRotationTranslation((float)totalDegreesrotatedradiance, Ptr->arr_Cell[i][j].m_Centro);
+					MathHelper::Matrix4 ME = MathHelper
+						::ScaleMatrix(Cell->Escala, Cell->Escala, Cell->Escala);
+					MathHelper::Matrix4 MT = MathHelper
+						::TranslationMatrix(Cell->m_Centro.X, Cell->m_Centro.Y, Cell->m_Centro.Z);
+					MathHelper::Matrix4 MRY;
+					if (Cell->m_Rot[1] != 0)
+					{
+						MRY = MathHelper::RotAroundY((float)Cell->m_Rot[1] * PI_OVER_180);
+					}
+
+					MathHelper::Matrix4 Multi = MathHelper::Multiply(MRY, ME);
+
+					MathHelper::Matrix4 MatrixModelo = MathHelper::Multiply(Multi, MT);
+
+					//Ptr->arr_Cell[i][j].float, 0, 0
+					unsigned int tempINT = Cell->mod->getGraphicsMemoryObjectId();
 					getOpenGLRenderer()->renderObject(
 						&m_colorModelShaderId,
-						&m_VertexArrayObject,
+						&tempINT,
 						0,
-						4,
+						Cell->mod->getNumFaces(),
 						Color,
-						&modelmatrix,
+						&MatrixModelo,
+						&m_Camera->GetViewMatrix(),
+						&m_Camera->GetProyectionMatrix(),
 						COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
 						false
 					);
-					if (Ptr->arr_Cell[i][j].mod != nullptr)
-					{
-						MathHelper::Matrix4 ME = MathHelper
-							::ScaleMatrix(Ptr->arr_Cell[i][j].Escala, Ptr->arr_Cell[i][j].Escala, Ptr->arr_Cell[i][j].Escala);
-						MathHelper::Matrix4 MT = MathHelper
-							::TranslationMatrix(Ptr->arr_Cell[i][j].m_Centro.X, Ptr->arr_Cell[i][j].m_Centro.Y, Ptr->arr_Cell[i][j].m_Centro.Z);
-						MathHelper::Matrix4 MRY;
-						if (Ptr->arr_Cell[i][j].m_Rot[1] != 0)
-						{
-							MRY = MathHelper::RotAroundY((float)Ptr->arr_Cell[i][j].m_Rot[1] * PI_OVER_180);
-						}
-
-						MathHelper::Matrix4 Multi = MathHelper::Multiply(MRY, ME);
-
-						MathHelper::Matrix4 MatrixModelo = MathHelper::Multiply(Multi, MT);
-
-						//Ptr->arr_Cell[i][j].float, 0, 0
-						unsigned int tempINT = Ptr->arr_Cell[i][j].mod->getGraphicsMemoryObjectId();
-						getOpenGLRenderer()->renderObject(
-							&m_colorModelShaderId,
-							&tempINT,
-							0,
-							m_gameObjects[i]->m_modelos->getNumFaces(),
-							Color,
-							&MatrixModelo,
-							COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
-							false
-						);
-					}
 				}
 			}
+
+		//	for (int i = 0; i < Ptr->m_Filas; i++)
+		//	{
+		//		for (int j = 0; j < Ptr->m_Columnas; j++)
+		//		{
+		//			modelmatrix = MathHelper::SimpleModelMatrixRotationTranslation((float)totalDegreesrotatedradiance, Ptr->arr_Cell[i][j].m_Centro);
+		//			getOpenGLRenderer()->renderObject(
+		//				&m_colorModelShaderId,
+		//				&m_VertexArrayObject,
+		//				0,
+		//				4,
+		//				Color,
+		//				&modelmatrix,
+		//				COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
+		//				false
+		//			);
+		//			if (Ptr->arr_Cell[i][j].mod != nullptr)
+		//			{
+		//				MathHelper::Matrix4 ME = MathHelper
+		//					::ScaleMatrix(Ptr->arr_Cell[i][j].Escala, Ptr->arr_Cell[i][j].Escala, Ptr->arr_Cell[i][j].Escala);
+		//				MathHelper::Matrix4 MT = MathHelper
+		//					::TranslationMatrix(Ptr->arr_Cell[i][j].m_Centro.X, Ptr->arr_Cell[i][j].m_Centro.Y, Ptr->arr_Cell[i][j].m_Centro.Z);
+		//				MathHelper::Matrix4 MRY;
+		//				if (Ptr->arr_Cell[i][j].m_Rot[1] != 0)
+		//				{
+		//					MRY = MathHelper::RotAroundY((float)Ptr->arr_Cell[i][j].m_Rot[1] * PI_OVER_180);
+		//				}
+
+		//				MathHelper::Matrix4 Multi = MathHelper::Multiply(MRY, ME);
+
+		//				MathHelper::Matrix4 MatrixModelo = MathHelper::Multiply(Multi, MT);
+
+		//				//Ptr->arr_Cell[i][j].float, 0, 0
+		//				unsigned int tempINT = Ptr->arr_Cell[i][j].mod->getGraphicsMemoryObjectId();
+		//				getOpenGLRenderer()->renderObject(
+		//					&m_colorModelShaderId,
+		//					&tempINT,
+		//					0,
+		//					m_gameObjects[i]->m_modelos->getNumFaces(),
+		//					Color,
+		//					&MatrixModelo,
+		//					COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
+		//					false
+		//				);
+		//			}
+		//		}
+		//	}
 		}
 		/*CVector3 TempVector = { 0.0f, 0.0f, 0.0f };
 		MathHelper::Matrix4 gameObjectMatrix;
@@ -385,7 +720,9 @@ void CAppHexagrid::onMouseMove(float deltaX, float deltaY)
 		float moveX = -deltaX * DEFAULT_CAMERA_MOVE_SPEED;
 		float moveZ = -deltaY * DEFAULT_CAMERA_MOVE_SPEED;
 		float currPos[3];
-		for (int i = 0; i < Ptr->m_Filas; i++)
+		m_Camera->MoveCam(moveX, moveZ);
+
+		/*for (int i = 0; i < Ptr->m_Filas; i++)
 		{
 			for (int j = 0; j < Ptr->m_Columnas; j++)
 			{
@@ -394,8 +731,7 @@ void CAppHexagrid::onMouseMove(float deltaX, float deltaY)
 				currPos[2] += moveZ;
 				Ptr->arr_Cell[i][j].m_Centro.setValues(currPos);
 			}
-		}
-		
+		}*/
 	}
 }
 

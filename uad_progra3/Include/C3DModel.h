@@ -105,6 +105,8 @@ public:
 	bool hasTextures() const { return m_modelHasTextures; }
 
 	const char * const getTextureFilename() const { return m_modelTextureFilename; }
+
+	bool LoadToGraphicsMemory(COpenGLRenderer * const shp_OpenGLRenderer);
 };
 
 #endif // !C3DMODEL_H

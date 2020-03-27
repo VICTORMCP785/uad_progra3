@@ -363,6 +363,99 @@ CFrustum::FRUSTUM_VISIBILITY_TEST_RESULT CFrustum::isAABBVisible(AABB_2D &aabb)
 	return result;
 }
 
+CFrustum::FRUSTUM_VISIBILITY_TEST_RESULT CFrustum::isAABBVisible2D(CAABB_2D & AABB_2D)
+{
+	CFrustum::FRUSTUM_VISIBILITY_TEST_RESULT result = FRUSTUM_VISIBILITY_TEST_RESULT::INSIDE;
+	int visibleCorners = 0;
+	int totalCorners = 4;
+
+	// If any of the 4 corners of the AABB is INSIDE ALL PLANES of the frustum, then the AABB is at least partially visible
+	
+	if (isPointVisible(AABB_2D.m_topLeft) == FRUSTUM_VISIBILITY_TEST_RESULT::INSIDE)
+	{
+		++visibleCorners;
+	}
+	if (isPointVisible(AABB_2D.m_topRight) == FRUSTUM_VISIBILITY_TEST_RESULT::INSIDE)
+	{
+		++visibleCorners;
+	}
+	if (isPointVisible(AABB_2D.m_bottomLeft) == FRUSTUM_VISIBILITY_TEST_RESULT::INSIDE)
+	{
+		++visibleCorners;
+	}
+	if (isPointVisible(AABB_2D.m_bottomRight) == FRUSTUM_VISIBILITY_TEST_RESULT::INSIDE)
+	{
+		++visibleCorners;
+	}
+
+	// No corners visible, AABB is very likely outside the frustum
+	if (visibleCorners == 0)
+	{
+		result = FRUSTUM_VISIBILITY_TEST_RESULT::OUTSIDE;
+
+		// 
+		// Add an additional test in case the AABB is large enough that all points are outside the frustum but it's still intersecting the frustum
+		/*
+		__________
+		eye /         / Frustum
+		\        /
+		\      /
+		\    /
+		__\__/__
+		|   \/   | AABB
+		|________|
+		*/
+		int numCornersOutside = 0;
+
+		// For each plane
+		for (int i = 0; i < 6; ++i)
+		{
+			// Reset counter
+			numCornersOutside = 0;
+
+			// For each corner of the AABB
+			if (m_planes[i].distanceToPoint(AABB_2D.m_topLeft) < 0.0f)
+			{
+				++numCornersOutside;
+			}
+			if (m_planes[i].distanceToPoint(AABB_2D.m_topRight) < 0.0f)
+			{
+				++numCornersOutside;
+			}
+			if (m_planes[i].distanceToPoint(AABB_2D.m_bottomLeft) < 0.0f)
+			{
+				++numCornersOutside;
+			}
+			if (m_planes[i].distanceToPoint(AABB_2D.m_bottomRight) < 0.0f)
+			{
+				++numCornersOutside;
+			}
+			
+			// All corners are outside of THE SAME plane, it's safe to reject the AABB
+			if (numCornersOutside == totalCorners)
+			{
+				result = FRUSTUM_VISIBILITY_TEST_RESULT::OUTSIDE;
+				break;
+			}
+			else if (numCornersOutside > 0 && numCornersOutside < totalCorners)
+			{
+				// Some of the corners of the AABB are inside and some are outside of this plane
+				// Set the result temporarily to INTERSECT but don't break the loop and check the next plane
+				result = FRUSTUM_VISIBILITY_TEST_RESULT::INTERSECT;
+			}
+		}
+
+		// This is still not the perfect solution, some AABB would still be reported to be INTERSECTING the frustum
+	}
+	// At least one corner visible but not all 8, AABB is intersecting the frustum
+	else if (visibleCorners < totalCorners)
+	{
+		result = FRUSTUM_VISIBILITY_TEST_RESULT::INTERSECT;
+	}
+
+	return result;
+}
+
 /*
 */
 CFrustum::FRUSTUM_VISIBILITY_TEST_RESULT CFrustum::isPointVisible(CVector3 &point)
@@ -372,7 +465,8 @@ CFrustum::FRUSTUM_VISIBILITY_TEST_RESULT CFrustum::isPointVisible(CVector3 &poin
 	// If the point is INSIDE ALL planes of the frustum, it is visible
 	for (int i = 0; i < 6; ++i) 
 	{
-		if (m_planes[i].distanceToPoint(point) < 0.0f)
+		float Distance = m_planes[i].distanceToPoint(point);
+		if (Distance < 0.0f)
 		{
 			return FRUSTUM_VISIBILITY_TEST_RESULT::OUTSIDE;
 		}
